@@ -16,7 +16,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         operation_description="Obtain a new pair of access and refresh tokens by providing valid user credentials.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['username', 'password'],
+            required=['email', 'password'],
             properties={
                 'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email'),
                 'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password'),
