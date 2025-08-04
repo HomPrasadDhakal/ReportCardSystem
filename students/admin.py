@@ -21,7 +21,7 @@ class StudentAdmin(admin.ModelAdmin):
         - Show created and updated timestamps as read-only fields.
         - Organize form fields using fieldsets for better clarity.
     """
-    list_display = ['id', 'name', 'email', 'date_of_birth', 'created_date', 'updated_date']
+    list_display = [ 'name','id', 'email', 'date_of_birth', 'created_date', 'updated_date']
     list_display_links = ['id', 'name']
     search_fields = ['name', 'email']
     list_filter = ['created_date', 'updated_date']
