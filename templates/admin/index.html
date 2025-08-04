@@ -1,0 +1,60 @@
+{% extends "admin/index.html" %}
+
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+.dashboard #content {
+    width: 90%;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    margin: 0;
+    padding: 8px;
+    font-weight: 400;
+    font-size: 13px;
+    text-align: left;
+    background: #81a096;
+    color: var(--header-link-color);
+}
+thead th.sorted {
+    background: #81a096;
+}
+.footertext {
+    height: 100px;
+    background-color: #81a096;
+    margin: 10px 0px;
+    text-align: center;
+    
+
+}
+.footertext {
+    height: auto;
+    margin-bottom: 0px;
+    padding: 5px 0;
+}
+
+.footertext h2{
+    color: white;
+    padding-top: 12px;
+    font-weight: 400;
+
+}
+.footer-img {
+    height: 60px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+</style>
+{% endblock %}
+
+{% block sidebar  %}
+{% endblock %}
+
+{% block footer %}
+<div class="footertext">
+    <h2>© 2025  <a href="https://ing.com.np/" style="color:#036;">
+        <img class="footer-img" src="https://ing.com.np/images/ing-tech-logo.svg" alt="" srcset="">
+    </a> All Rights Reserved</h2>
+</div>
+{% endblock %}

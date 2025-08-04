@@ -8,6 +8,10 @@ from django.conf.urls import include
 from django.conf import settings
 from django.conf.urls.static import static
 
+admin.site.site_header = "Report Card System Admin"
+admin.site.site_title = "Report Card System Admin Portal"
+admin.site.index_title = "Welcome to Report Card System Admin"
+
 
 schema_view = get_schema_view(
     openapi.Info(

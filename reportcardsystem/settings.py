@@ -35,6 +35,9 @@ INSTALLED_APPS = [
 TAILWIND_APP_NAME = 'theme'
 NPM_BIN_PATH = 'npm.cmd'
 
+# custom user model
+AUTH_USER_MODEL = 'accounts.User'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -78,6 +81,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'reportcardsystem.wsgi.application'
 
+# Database configuration should be postgres later
+# For now, using SQLite for development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -102,17 +107,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = config('TIME_ZONE', default='UTC')
-
 USE_I18N = True
-
 USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR/'static']
 STATIC_ROOT = BASE_DIR/'staticfiles'
-
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR/'media'
 
