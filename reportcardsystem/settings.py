@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'theme',
     # Custom apps
     'accounts.apps.AccountsConfig',
-    
+    'students.apps.StudentsConfig',
+
 ]
 
 # settings for Tailwind CSS
