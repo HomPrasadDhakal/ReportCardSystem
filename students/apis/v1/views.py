@@ -8,6 +8,7 @@ from .serializers import StudentSerializer
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from core.logs.logger import logger
 
 
 class StudentView(viewsets.ViewSet):
@@ -67,7 +68,7 @@ class StudentView(viewsets.ViewSet):
                 }
             ),
         },
-        tags=["Students"],
+        tags=["Student Endpoints"],
         security=[{'Bearer': []}]
     )
     def create(self, request):
@@ -81,6 +82,7 @@ class StudentView(viewsets.ViewSet):
                     'data': serializer.data,
                     'message': 'Student created successfully',
                 }
+                logger.info("student created successfully")
                 return Response(response, status=status.HTTP_201_CREATED)
             else:
                 response = {
@@ -88,12 +90,14 @@ class StudentView(viewsets.ViewSet):
                     'errors': serializer.errors,
                     'message': 'Failed to create student',
                 }
+                logger.warning(f"Error: {serializer.errors}")
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             response = {
                 'success': False,
                 'message': str(e),
             }
+            logger.error(f"Error : {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
@@ -138,7 +142,7 @@ class StudentView(viewsets.ViewSet):
                 }
             ),
         },
-        tags=["Students"],
+        tags=["Student Endpoints"],
         security=[{'Bearer': []}]
     )
     def retrieve(self, request, pk=None):
@@ -151,18 +155,21 @@ class StudentView(viewsets.ViewSet):
                 'data': serializer.data,
                 'message': 'Student retrieved successfully',
             }
+            logger.info("successfully retrive student data")
             return Response(response, status=status.HTTP_200_OK)
-        except Student.DoesNotExist:
+        except Student.DoesNotExist as e:
             response = {
                 'success': False,
                 'message': 'Student not found',
             }
+            logger.warning(f"Error: {e}")
             return Response(response, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             response = {
                 'success': False,
                 'message': str(e),
             }
+            logger.warning(f"Error: {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @swagger_auto_schema(
@@ -221,13 +228,14 @@ class StudentView(viewsets.ViewSet):
                 }
             ),
         },
-        tags=["Students"],
+        tags=["Student Endpoints"],
         security=[{'Bearer': []}]
     )
     def update(self, request, pk=None):
         try:
             student = Student.objects.get(pk=pk)
-        except Student.DoesNotExist:
+        except Student.DoesNotExist as e:
+            logger.warning(f"Error: {e}")
             return Response(
                 {"success": False, "message": "Student not found"},
                 status=status.HTTP_404_NOT_FOUND
@@ -235,12 +243,14 @@ class StudentView(viewsets.ViewSet):
         serializer = StudentSerializer(student, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info("Student data updated successfully")
             return Response({
                 "success": True,
                 "data": serializer.data,
-                "message": "Student updated successfully"
+                "message": "Student data updated successfully"
             })
         else:
+            logger.warning(f"Error:{serializer.errors}")
             return Response({
                 "success": False,
                 "errors": serializer.errors,
@@ -284,19 +294,21 @@ class StudentView(viewsets.ViewSet):
                 }
             ),
         },
-        tags=["Students"],
+        tags=["Student Endpoints"],
         security=[{'Bearer': []}]
     )
     def destroy(self, request, pk=None):
         try:
             student = Student.objects.get(pk=pk)
             student.delete()
+            logger.info("Student data deleted successfully")
             response = {
                 'sucess':True,
                 'message':" data delete sucessfully"
             }
             return Response(response, status=status.HTTP_204_NO_CONTENT)
-        except Student.DoesNotExist:
+        except Student.DoesNotExist as e:
+            logger.warning(f"Error: {e}")
             return Response(
                 {
                     "success": False,
@@ -304,6 +316,7 @@ class StudentView(viewsets.ViewSet):
                 }, status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
+            logger.error(f"Error: {e}")
             return Response(
                 {
                     "success": False,
