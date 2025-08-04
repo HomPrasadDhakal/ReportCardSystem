@@ -12,14 +12,12 @@ from drf_yasg import openapi
 
 class StudentView(viewsets.ViewSet):
     """
-    ViewSet representing a student model  with authentication and permission checks.
-    Handles CRUD operations for students model in the academic system.
+    Handles CRUD operations for students model.
     Base classes:
         - viewsets.ViewSet
     Returns:
         - StudentView: Handles CRUD operations for Student instances.
     """
-
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -144,7 +142,7 @@ class StudentView(viewsets.ViewSet):
         security=[{'Bearer': []}]
     )
     def retrieve(self, request, pk=None):
-        """GET /students/{id}/ - Retrieve a student by ID"""
+        """GET /students/{id}/ - Retrieve student by ID"""
         try:
             student = Student.objects.get(pk=pk)
             serializer = StudentSerializer(student)
@@ -166,3 +164,150 @@ class StudentView(viewsets.ViewSet):
                 'message': str(e),
             }
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    @swagger_auto_schema(
+        operation_summary="Update Student data",
+        operation_description="update student by their ID.",
+        request_body=StudentSerializer,
+        responses={
+            200: openapi.Response(
+                description="data updated successfully", 
+                schema=StudentSerializer,
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "data": {
+                            "name": "Hom Prasad Dhakal",
+                            "email": "test@example.com",
+                            "date_of_birth": "2000-01-01",
+                        },
+                        "message": "data updated successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Bad Request",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "errors": {
+                            "name": ["This field is required."],
+                            "email": ["This field is required."],
+                            "date_of_birth": ["This field is required."]
+                        },
+                        "message": "Failed to create student"
+                    }
+                }
+            ), 
+            404: openapi.Response(
+                description="Student not found",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "Student not found"
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="internal server error",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "Internal server error"
+                    }
+                }
+            ),
+        },
+        tags=["Students"],
+        security=[{'Bearer': []}]
+    )
+    def update(self, request, pk=None):
+        try:
+            student = Student.objects.get(pk=pk)
+        except Student.DoesNotExist:
+            return Response(
+                {"success": False, "message": "Student not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = StudentSerializer(student, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "success": True,
+                "data": serializer.data,
+                "message": "Student updated successfully"
+            })
+        else:
+            return Response({
+                "success": False,
+                "errors": serializer.errors,
+                "message": "Failed to update student"
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    @swagger_auto_schema(
+        operation_summary="Delete Student data",
+        operation_description="Delete student by their ID.",
+        request_body=None,
+        responses={
+            204: openapi.Response(
+                description="Data deleted successfully", 
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "message": "data deleted successfully"
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="Student not found",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "Student not found"
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="internal server error",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "Internal server error"
+                    }
+                }
+            ),
+        },
+        tags=["Students"],
+        security=[{'Bearer': []}]
+    )
+    def destroy(self, request, pk=None):
+        try:
+            student = Student.objects.get(pk=pk)
+            student.delete()
+            response = {
+                'sucess':True,
+                'message':" data delete sucessfully"
+            }
+            return Response(response, status=status.HTTP_204_NO_CONTENT)
+        except Student.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Student not found"
+                }, status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Internal server error"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
