@@ -27,7 +27,7 @@ class Student(models.Model):
 
 class Subject(models.Model):
     """
-    Model representing a subject in the academic system.
+    Model representing a subject name and code.
     Base classes:
         - models.Model
     Returns:
@@ -74,7 +74,7 @@ class ReportCard(models.Model):
 
 class Mark(models.Model):
     """
-    Model representing marks obtained by a student in a subject.
+    Model representing marks obtained by a student in a subject and report_card.
     Base classes:
         - models.Model
     Returns:

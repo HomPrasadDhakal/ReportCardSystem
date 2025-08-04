@@ -4,12 +4,57 @@
 {% endblock title %}
 
 {% block css %}
+<style>
+    .mainbox{
+        width: 100%;
+        height: 70vh;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #43766C;
+        border-radius: 4vh;
+        background-color: #43766C;
+        color: white;
+    }
+    .title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: white;
+        text-align: center;
+        width: 60%;
+        margin-left: 20%;
+    }
+.image img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.image {
+    width: 30%;
+    height: 30%;
+    margin-left: 35%;
+    margin-top: 5%;
+}
+
+</style>
 {% endblock css %}
 
 {% block body %}
 <section>
     <div class="container">
-        <h2 class=" text-center capitalize mt-5 text-green-500">welcome to report card management system</h2>
+        <div class="mainbox mt-5 pt-5">
+            <h3 class="title">Welcome to Report Card System</h3>
+            <div class="image">
+                <img src="https://ing.com.np/images/ing-tech-logo.svg" alt="" srcset="">
+            </div>
+            <div class="row justify-content-center mt-5 pt-5">
+                <div class="col-auto">
+                    <a href="swagger" class="btn btn-success">View swagger Docs</a>
+                </div>
+                <div class="col-auto">
+                    <a href="documentation" class="btn btn-success">View APIs Documentation</a>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock body %}
