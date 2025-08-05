@@ -4,7 +4,7 @@ from students.models import Student, Subject, ReportCard, Mark
 
 class StudentSerializer(serializers.ModelSerializer):
     """
-    Serializer representing a student in the academic system with validation.
+    Serializer representing a student model with validation.
     Base classes:
         - serializers.ModelSerializer
     Returns:
@@ -35,4 +35,27 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Date of birth year is too far in the past.")
         if value.year > 2025:
             raise serializers.ValidationError("Date of birth year cannot be in the future.")
+        return value
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    """
+        Serializer representing a subject model with validation.
+        Base classes:
+            - serializers.ModelSerializer
+        Returns:
+            - SubjectSerializer: A serializer instance for Subject fields.
+    """
+    class Meta:
+        model = Subject
+        fields = ['name', 'code']
+
+    def validate_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Name is required.")
+        return value
+    
+    def validate_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Code is requried.")
         return value
