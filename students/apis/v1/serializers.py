@@ -59,3 +59,16 @@ class SubjectSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Code is requried.")
         return value
+    
+
+class ReportCardSerializer(serializers.ModelSerializer):
+    """
+        Serializer representing a report model with validation.
+        Base classes:
+            - serializers.ModelSerializer
+        Returns:
+            - ReportSerializer: A serializer instance for report fields.
+    """
+    class Meta:
+        model = ReportCard
+        fields = ['student', 'term','year']

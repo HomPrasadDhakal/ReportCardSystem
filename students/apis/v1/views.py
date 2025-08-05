@@ -6,10 +6,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from students.models import (
     Student,
     Subject,
+    ReportCard,
 )
 from .serializers import (
     StudentSerializer,
     SubjectSerializer,
+    ReportCardSerializer,
 )
 
 from drf_yasg.utils import swagger_auto_schema
@@ -637,3 +639,179 @@ class subjectView(viewsets.ViewSet):
                     "message": "Internal server error"
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+class ReportCardView(viewsets.ViewSet):
+    """
+        Handles add and update operations for reportcard model.
+        Base classes:
+            - viewsets.ViewSet
+        Returns:
+            - subjectView: Handles add and update operations for reportcard instances.
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Create a New ReportCard",
+        operation_description="Creates a new reportcard with the required fields: student term and year.",
+        request_body=ReportCardSerializer,
+        responses={
+            201: openapi.Response(
+                description="ReportCard created successfully", 
+                schema=ReportCardSerializer,
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "data": {
+                            "student": "Hom prasad Dhakal",
+                            "term": "term 1",
+                            "year": "2082"
+                        },
+                        "message": "ReportCard created successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Bad Request",
+                schema=ReportCardSerializer,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "errors": {
+                            "student": ["This field is required."],
+                            "term": ["This field is required."],
+                            "year": ["This field is required."]
+                        },
+                        "message": "Failed to create ReportCard"
+                    }
+                }
+            ), 
+            500: openapi.Response(
+                description="internal server error",
+                schema=ReportCardSerializer,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "Internal server error"
+                    }
+                }
+            ),
+        },
+        tags=["ReportCard Endpoints"],
+        security=[{'Bearer': []}]
+    )
+    def create(self, request):
+        """POST /ReportCard/ - Create a new ReportCard"""
+        serializer = ReportCardSerializer(data=request.data)
+        try:
+            if serializer.is_valid():
+                serializer.save()
+                response ={
+                    'success': True,
+                    'data': serializer.data,
+                    'message': 'ReportCard created successfully',
+                }
+                logger.info("ReportCard created successfully")
+                return Response(response, status=status.HTTP_201_CREATED)
+            else:
+                response = {
+                    'success': False,
+                    'errors': serializer.errors,
+                    'message': 'Failed to create ReportCard',
+                }
+                logger.warning(f"Error: {serializer.errors}")
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            response = {
+                'success': False,
+                'message': str(e),
+            }
+            logger.error(f"Error : {e}")
+            return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @swagger_auto_schema(
+        operation_summary="Update ReportCard data",
+        operation_description="update ReportCard by their ID.",
+        request_body=ReportCardSerializer,
+        responses={
+            200: openapi.Response(
+                description="data updated successfully", 
+                schema=ReportCardSerializer,
+                examples={
+                    "application/json": {
+                        "success": True,
+                        "data": {
+                            "student": "Hom PD Dhakal",
+                            "term": "Term 1",
+                            "year": "1990",
+                        },
+                        "message": "data updated successfully"
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Bad Request",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "errors": {
+                            "student": ["This field is required."],
+                            "term": ["This field is required."],
+                            "year": ["This field is required."]
+                        },
+                        "message": "Failed to create ReportCard"
+                    }
+                }
+            ), 
+            404: openapi.Response(
+                description="ReportCard not found",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "ReportCard not found"
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="internal server error",
+                schema=None,
+                examples={
+                    "application/json": {
+                        "success": False,
+                        "message": "Internal server error"
+                    }
+                }
+            ),
+        },
+        tags=["ReportCard Endpoints"],
+        security=[{'Bearer': []}]
+    )
+    def update(self, request, pk=None):
+        try:
+            obj = ReportCard.objects.get(pk=pk)
+        except ReportCard.DoesNotExist as e:
+            logger.warning(f"Error: {e}")
+            return Response(
+                {"success": False, "message": "ReportCard not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = ReportCardSerializer(obj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            logger.info("ReportCard data updated successfully")
+            return Response({
+                "success": True,
+                "data": serializer.data,
+                "message": "ReportCard data updated successfully"
+            })
+        else:
+            logger.warning(f"Error:{serializer.errors}")
+            return Response({
+                "success": False,
+                "errors": serializer.errors,
+                "message": "Failed to update ReportCard"
+            }, status=status.HTTP_400_BAD_REQUEST)
