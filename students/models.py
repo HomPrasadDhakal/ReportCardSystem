@@ -39,7 +39,7 @@ class Subject(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.name + " - " + self.code
 
     class Meta:
         db_table = 'subjects'
@@ -69,7 +69,7 @@ class ReportCard(models.Model):
         db_table = 'report_cards'
         verbose_name = 'Report Card'
         verbose_name_plural = 'Report Cards'
-        ordering = ['student', 'year']
+        ordering = ['student', 'year', 'term']
 
 
 class Mark(models.Model):
@@ -86,6 +86,8 @@ class Mark(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 
+    
+
     def __str__(self):
         return f"{self.report_card.student.name} - {self.subject.name} - {self.score}"
 
@@ -94,3 +96,4 @@ class Mark(models.Model):
         verbose_name = 'Mark'
         verbose_name_plural = 'Marks'
         ordering = ['report_card', 'subject']
+        unique_together = ('report_card', 'subject')

@@ -2,11 +2,16 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import action
+from django.db.models import Avg
+
+
 
 from students.models import (
     Student,
     Subject,
     ReportCard,
+    Mark,
 )
 from .serializers import (
     StudentSerializer,
@@ -639,7 +644,7 @@ class subjectView(viewsets.ViewSet):
                     "message": "Internal server error"
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
 
 class ReportCardView(viewsets.ViewSet):
     """
@@ -656,48 +661,6 @@ class ReportCardView(viewsets.ViewSet):
         operation_summary="Create a New ReportCard",
         operation_description="Creates a new reportcard with the required fields: student term and year.",
         request_body=ReportCardSerializer,
-        responses={
-            201: openapi.Response(
-                description="ReportCard created successfully", 
-                schema=ReportCardSerializer,
-                examples={
-                    "application/json": {
-                        "success": True,
-                        "data": {
-                            "student": "Hom prasad Dhakal",
-                            "term": "term 1",
-                            "year": "2082"
-                        },
-                        "message": "ReportCard created successfully"
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Bad Request",
-                schema=ReportCardSerializer,
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "errors": {
-                            "student": ["This field is required."],
-                            "term": ["This field is required."],
-                            "year": ["This field is required."]
-                        },
-                        "message": "Failed to create ReportCard"
-                    }
-                }
-            ), 
-            500: openapi.Response(
-                description="internal server error",
-                schema=ReportCardSerializer,
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "message": "Internal server error"
-                    }
-                }
-            ),
-        },
         tags=["ReportCard Endpoints"],
         security=[{'Bearer': []}]
     )
@@ -732,86 +695,64 @@ class ReportCardView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-        operation_summary="Update ReportCard data",
-        operation_description="update ReportCard by their ID.",
+        operation_summary="Update Marks in report Cards by subject",
+        operation_description="update marksin in report cards in reportcards by their ID.",
         request_body=ReportCardSerializer,
-        responses={
-            200: openapi.Response(
-                description="data updated successfully", 
-                schema=ReportCardSerializer,
-                examples={
-                    "application/json": {
-                        "success": True,
-                        "data": {
-                            "student": "Hom PD Dhakal",
-                            "term": "Term 1",
-                            "year": "1990",
-                        },
-                        "message": "data updated successfully"
-                    }
-                }
-            ),
-            400: openapi.Response(
-                description="Bad Request",
-                schema=None,
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "errors": {
-                            "student": ["This field is required."],
-                            "term": ["This field is required."],
-                            "year": ["This field is required."]
-                        },
-                        "message": "Failed to create ReportCard"
-                    }
-                }
-            ), 
-            404: openapi.Response(
-                description="ReportCard not found",
-                schema=None,
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "message": "ReportCard not found"
-                    }
-                }
-            ),
-            500: openapi.Response(
-                description="internal server error",
-                schema=None,
-                examples={
-                    "application/json": {
-                        "success": False,
-                        "message": "Internal server error"
-                    }
-                }
-            ),
-        },
         tags=["ReportCard Endpoints"],
         security=[{'Bearer': []}]
     )
-    def update(self, request, pk=None):
+    @action(detail=True, methods=['patch'], url_path='update-marks')
+    def update_marks(self, request, pk=None):
         try:
-            obj = ReportCard.objects.get(pk=pk)
-        except ReportCard.DoesNotExist as e:
-            logger.warning(f"Error: {e}")
-            return Response(
-                {"success": False, "message": "ReportCard not found"},
-                status=status.HTTP_404_NOT_FOUND
+            report_card = ReportCard.objects.get(pk=pk)
+        except ReportCard.DoesNotExist:
+            return Response({"error": "Report card not found"}, status=status.HTTP_404_NOT_FOUND)
+        marks_data = request.data.get('marks', [])
+        for mark_data in marks_data:
+            subject_id = mark_data.get('subject')
+            score = mark_data.get('score')
+            if subject_id is None or score is None:
+                return Response(
+                    {"error": "Each mark must include subject and score"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            Mark.objects.update_or_create(
+                report_card=report_card,
+                subject_id=subject_id,
+                defaults={'score': score}
             )
-        serializer = ReportCardSerializer(obj, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            logger.info("ReportCard data updated successfully")
-            return Response({
-                "success": True,
-                "data": serializer.data,
-                "message": "ReportCard data updated successfully"
-            })
-        else:
-            logger.warning(f"Error:{serializer.errors}")
-            return Response({
-                "success": False,
-                "errors": serializer.errors,
-                "message": "Failed to update ReportCard"
-            }, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ReportCardSerializer(report_card)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Report Card by student and Year",
+        operation_description="Report Card by student and Year",
+        tags=["ReportCard Endpoints"],
+        security=[{'Bearer': []}]
+    )
+    @action(detail=False, methods=['get'], url_path='student/(?P<student_id>\d+)/year/(?P<year>\d+)')
+    def report_cards_by_student_and_year(self, request, student_id=None, year=None):
+        report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
+        
+        if not report_cards.exists():
+            return Response({"message": "No report cards found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ReportCardSerializer(report_cards, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Yearly summary ReportCard",
+        operation_description="yearly summary report cards.",
+        tags=["ReportCard Endpoints"],
+        security=[{'Bearer': []}]
+    )
+    @action(detail=False, methods=['get'], url_path='student/(?P<student_id>[^/.]+)/year/(?P<year>\d+)/summary')
+    def yearly_summary(self, request, student_id, year):
+        report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
+        marks = report_cards.values('marks__subject').annotate(avg_score=Avg('marks__score'))
+        overall_avg = report_cards.aggregate(overall_avg=Avg('marks__score'))
+
+        return Response({
+            "average_per_subject": marks,
+            "overall_average": overall_avg['overall_avg']
+        })

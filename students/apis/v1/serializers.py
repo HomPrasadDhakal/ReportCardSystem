@@ -59,7 +59,19 @@ class SubjectSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Code is requried.")
         return value
-    
+
+class MarkSerializer(serializers.ModelSerializer):
+    """
+        Serializer representing a report model with validation.
+        Base classes:
+            - serializers.ModelSerializer
+        Returns:
+            - ReportSerializer: A serializer instance for report fields.
+    """
+
+    class Meta:
+        model = Mark
+        fields = ['id', 'subject', 'score']
 
 class ReportCardSerializer(serializers.ModelSerializer):
     """
@@ -69,6 +81,30 @@ class ReportCardSerializer(serializers.ModelSerializer):
         Returns:
             - ReportSerializer: A serializer instance for report fields.
     """
+    marks = MarkSerializer(many=True)
+
     class Meta:
         model = ReportCard
-        fields = ['student', 'term','year']
+        fields = ['id', 'student', 'year', 'term', 'marks']
+
+    def create(self, validated_data):
+        marks_data = validated_data.pop('marks')
+        report_card = ReportCard.objects.create(**validated_data)
+        for mark in marks_data:
+            Mark.objects.create(report_card=report_card, **mark)
+        return report_card
+
+    def update(self, instance, validated_data):
+        marks_data = validated_data.pop('marks')
+        instance.term = validated_data.get('term', instance.term)
+        instance.year = validated_data.get('year', instance.year)
+        instance.save()
+
+        for mark_data in marks_data:
+            Mark.objects.update_or_create(
+                report_card=instance,
+                subject=mark_data['subject'],
+                defaults={'score': mark_data['score']}
+            )
+
+        return instance
