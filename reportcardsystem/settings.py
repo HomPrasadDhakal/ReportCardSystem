@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
 from django.core.management.utils import get_random_secret_key
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 try:
     SECRET_KEY =config("SECRET_KEY")
 except:
@@ -24,19 +24,12 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'drf_yasg',
-    'tailwind',
-    'theme',
     # Custom apps
     'accounts.apps.AccountsConfig',
     'students.apps.StudentsConfig',
 
 ]
 
-# settings for Tailwind CSS
-TAILWIND_APP_NAME = 'theme'
-NPM_BIN_PATH = 'npm.cmd'
-
-# custom user model
 AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
@@ -51,12 +44,8 @@ MIDDLEWARE = [
 
 if DEBUG:
     INSTALLED_APPS += [
-        'django_browser_reload',
         'debug_toolbar'
         ]
-    MIDDLEWARE += [
-        "django_browser_reload.middleware.BrowserReloadMiddleware",
-    ]
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
     INTERNAL_IPS = [
         "127.0.0.1",
@@ -82,15 +71,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'reportcardsystem.wsgi.application'
 
-# Database configuration should be postgres later
-# For now, using SQLite for development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -99,6 +85,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 SWAGGER_SETTINGS = {
@@ -128,7 +124,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = config('TIME_ZONE', default='UTC')

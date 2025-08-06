@@ -12,6 +12,17 @@ class CustomAccountManager(BaseUserManager):
         - create user and superuser instances.
     """
     def create_user(self, email, username, password=None, **other_fields):
+        """
+        This function will create user
+        Args:
+            - email (str)
+            - username (str)
+            - password 
+        Kwargs:
+            - other_fields
+        Returns:
+            - user instance
+        """
         email = self.normalize_email(email)
         user  = self.model(email=email, username=username, **other_fields)
         if password is None:
@@ -21,6 +32,18 @@ class CustomAccountManager(BaseUserManager):
         return user
     
     def create_superuser(self, email, username, password=None, **other_fields):
+        """
+        This func will create the super user
+        Args:
+            - email (str)
+            - username (str)
+            - password (str) or none
+        Kwargs:
+            - other_fields 
+        Returns:
+            - users instance
+        """
+        
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)

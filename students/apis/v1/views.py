@@ -1,12 +1,12 @@
+from drf_yasg import openapi
+from django.db.models import Avg
+from core.logs.logger import logger
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.decorators import action
-from django.db.models import Avg
-
-
-
 from students.models import (
     Student,
     Subject,
@@ -18,11 +18,6 @@ from .serializers import (
     SubjectSerializer,
     ReportCardSerializer,
 )
-
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from core.logs.logger import logger
-
 
 class StudentView(viewsets.ViewSet):
     """
@@ -85,7 +80,6 @@ class StudentView(viewsets.ViewSet):
         security=[{'Bearer': []}]
     )
     def create(self, request):
-        """POST /students/ - Create a new student"""
         serializer = StudentSerializer(data=request.data)
         try:
             if serializer.is_valid():
@@ -103,7 +97,7 @@ class StudentView(viewsets.ViewSet):
                     'errors': serializer.errors,
                     'message': 'Failed to create student',
                 }
-                logger.warning(f"Error: {serializer.errors}")
+                logger.error(f"Error: {serializer.errors}")
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             response = {
@@ -112,7 +106,7 @@ class StudentView(viewsets.ViewSet):
             }
             logger.error(f"Error : {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
 
     @swagger_auto_schema(
         operation_summary="Retrieve a Student data",
@@ -159,7 +153,6 @@ class StudentView(viewsets.ViewSet):
         security=[{'Bearer': []}]
     )
     def retrieve(self, request, pk=None):
-        """GET /students/{id}/ - Retrieve student by ID"""
         try:
             student = Student.objects.get(pk=pk)
             serializer = StudentSerializer(student)
@@ -175,16 +168,17 @@ class StudentView(viewsets.ViewSet):
                 'success': False,
                 'message': 'Student not found',
             }
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(response, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             response = {
                 'success': False,
                 'message': str(e),
             }
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+
     @swagger_auto_schema(
         operation_summary="Update Student data",
         operation_description="update student by their ID.",
@@ -248,7 +242,7 @@ class StudentView(viewsets.ViewSet):
         try:
             student = Student.objects.get(pk=pk)
         except Student.DoesNotExist as e:
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(
                 {"success": False, "message": "Student not found"},
                 status=status.HTTP_404_NOT_FOUND
@@ -263,7 +257,7 @@ class StudentView(viewsets.ViewSet):
                 "message": "Student data updated successfully"
             })
         else:
-            logger.warning(f"Error:{serializer.errors}")
+            logger.error(f"Error:{serializer.errors}")
             return Response({
                 "success": False,
                 "errors": serializer.errors,
@@ -321,7 +315,7 @@ class StudentView(viewsets.ViewSet):
             }
             return Response(response, status=status.HTTP_204_NO_CONTENT)
         except Student.DoesNotExist as e:
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(
                 {
                     "success": False,
@@ -396,7 +390,6 @@ class subjectView(viewsets.ViewSet):
         security=[{'Bearer': []}]
     )
     def create(self, request):
-        """POST /Subject/ - Create a new subject"""
         serializer = SubjectSerializer(data=request.data)
         try:
             if serializer.is_valid():
@@ -414,7 +407,7 @@ class subjectView(viewsets.ViewSet):
                     'errors': serializer.errors,
                     'message': 'Failed to create subject',
                 }
-                logger.warning(f"Error: {serializer.errors}")
+                logger.error(f"Error: {serializer.errors}")
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             response = {
@@ -468,7 +461,6 @@ class subjectView(viewsets.ViewSet):
         security=[{'Bearer': []}]
     )
     def retrieve(self, request, pk=None):
-        """GET /Subject/{id}/ - Retrieve Subject by ID"""
         try:
             subject_obj = Subject.objects.get(pk=pk)
             serializer = SubjectSerializer(subject_obj)
@@ -484,14 +476,14 @@ class subjectView(viewsets.ViewSet):
                 'success': False,
                 'message': 'subject not found',
             }
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(response, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             response = {
                 'success': False,
                 'message': str(e),
             }
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -556,7 +548,7 @@ class subjectView(viewsets.ViewSet):
         try:
             obj = Subject.objects.get(pk=pk)
         except Subject.DoesNotExist as e:
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(
                 {"success": False, "message": "subject not found"},
                 status=status.HTTP_404_NOT_FOUND
@@ -571,13 +563,13 @@ class subjectView(viewsets.ViewSet):
                 "message": "Subject data updated successfully"
             })
         else:
-            logger.warning(f"Error:{serializer.errors}")
+            logger.error(f"Error:{serializer.errors}")
             return Response({
                 "success": False,
                 "errors": serializer.errors,
                 "message": "Failed to update subject"
             }, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
     @swagger_auto_schema(
         operation_summary="Delete subject data",
@@ -629,7 +621,7 @@ class subjectView(viewsets.ViewSet):
             }
             return Response(response, status=status.HTTP_204_NO_CONTENT)
         except Subject.DoesNotExist as e:
-            logger.warning(f"Error: {e}")
+            logger.error(f"Error: {e}")
             return Response(
                 {
                     "success": False,
@@ -665,7 +657,6 @@ class ReportCardView(viewsets.ViewSet):
         security=[{'Bearer': []}]
     )
     def create(self, request):
-        """POST /ReportCard/ - Create a new ReportCard"""
         serializer = ReportCardSerializer(data=request.data)
         try:
             if serializer.is_valid():
@@ -683,7 +674,7 @@ class ReportCardView(viewsets.ViewSet):
                     'errors': serializer.errors,
                     'message': 'Failed to create ReportCard',
                 }
-                logger.warning(f"Error: {serializer.errors}")
+                logger.error(f"Error: {serializer.errors}")
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             response = {
@@ -691,6 +682,39 @@ class ReportCardView(viewsets.ViewSet):
                 'message': str(e),
             }
             logger.error(f"Error : {e}")
+            return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @swagger_auto_schema(
+    operation_summary="Retrieve a ReportCard",
+    operation_description="Retrieves a specific report card by ID.",
+    tags=["ReportCard Endpoints"],
+    security=[{'Bearer': []}]
+    )
+    def retrieve(self, request, pk=None):
+        try:
+            report_card = ReportCard.objects.get(pk=pk)
+            serializer = ReportCardSerializer(report_card)
+            response = {
+                'success': True,
+                'data': serializer.data,
+                'message': 'ReportCard retrieved successfully',
+            }
+            logger.info("ReportCard retrieved successfully")
+            return Response(response, status=status.HTTP_200_OK)
+        except ReportCard.DoesNotExist:
+            response = {
+                'success': False,
+                'message': f'ReportCard does not exist',
+            }
+            logger.warning(f"ReportCard not found")
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            response = {
+                'success': False,
+                'message': str(e),
+            }
+            logger.error(f"Error retrieving ReportCard: {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -724,35 +748,41 @@ class ReportCardView(viewsets.ViewSet):
         serializer = ReportCardSerializer(report_card)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
     @swagger_auto_schema(
-        operation_summary="Report Card by student and Year",
-        operation_description="Report Card by student and Year",
+        operation_summary="Report Cards and Yearly Summary by Student and Year",
+        operation_description="Fetches report cards and computes yearly average scores by student and year.",
         tags=["ReportCard Endpoints"],
         security=[{'Bearer': []}]
     )
     @action(detail=False, methods=['get'], url_path=r'student/(?P<student_id>\d+)/year/(?P<year>\d+)')
-    def report_cards_by_student_and_year(self, request, student_id=None, year=None):
-        report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
-        
-        if not report_cards.exists():
-            return Response({"message": "No report cards found."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = ReportCardSerializer(report_cards, many=True)
-        return Response(serializer.data)
-
-    @swagger_auto_schema(
-        operation_summary="Yearly summary ReportCard",
-        operation_description="yearly summary report cards.",
-        tags=["ReportCard Endpoints"],
-        security=[{'Bearer': []}]
-    )
-    @action(detail=False, methods=['get'], url_path=r'student/(?P<student_id>\d+)/year/(?P<year>\d+)')
-    def yearly_summary(self, request, student_id, year):
-        report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
-        marks = report_cards.values('marks__subject').annotate(avg_score=Avg('marks__score'))
-        overall_avg = report_cards.aggregate(overall_avg=Avg('marks__score'))
-
-        return Response({
-            "average_per_subject": marks,
-            "overall_average": overall_avg['overall_avg']
-        })
+    def report_cards_with_summary(self, request, student_id=None, year=None):
+        try:
+            report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
+            if not report_cards.exists():
+                return Response({
+                    "success": False,
+                    "message": "No report cards found for this student and year."
+                }, status=status.HTTP_404_NOT_FOUND)
+            serializer = ReportCardSerializer(report_cards, many=True)
+            subject_averages = report_cards.values('marks__subject').annotate(avg_score=Avg('marks__score'))
+            overall_avg = report_cards.aggregate(overall_avg=Avg('marks__score'))['overall_avg']
+            response = {
+                "success": True,
+                "data": {
+                    "report_cards": serializer.data,
+                    "summary": {
+                        "average_per_subject": subject_averages,
+                        "overall_average": overall_avg
+                    }
+                },
+                "message": "Report cards and summary fetched successfully."
+            }
+            logger.info("Report cards and summary retrieved successfully.")
+            return Response(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error while fetching report card and summary: {e}")
+            return Response({
+                "success": False,
+                "message": f"Internal server error: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -70,6 +70,7 @@ class ReportCard(models.Model):
         verbose_name = 'Report Card'
         verbose_name_plural = 'Report Cards'
         ordering = ['student', 'year', 'term']
+        unique_together = ('student', 'term','year')
 
 
 class Mark(models.Model):
@@ -85,8 +86,6 @@ class Mark(models.Model):
     score = models.DecimalField(max_digits=5, decimal_places=2)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-
-    
 
     def __str__(self):
         return f"{self.report_card.student.name} - {self.subject.name} - {self.score}"
