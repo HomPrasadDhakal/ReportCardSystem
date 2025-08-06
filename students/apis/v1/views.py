@@ -1,12 +1,16 @@
 from drf_yasg import openapi
 from django.db.models import Avg
+from django.db import transaction
 from core.logs.logger import logger
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
+
 from students.models import (
     Student,
     Subject,
@@ -154,7 +158,10 @@ class StudentView(viewsets.ViewSet):
     )
     def retrieve(self, request, pk=None):
         try:
-            student = Student.objects.get(pk=pk)
+            student = get_object_or_404(
+                Student.objects.only('id', 'name', 'email', 'date_of_birth'),
+                pk=pk
+            )
             serializer = StudentSerializer(student)
             response = {
                 'success': True,
@@ -240,14 +247,14 @@ class StudentView(viewsets.ViewSet):
     )
     def update(self, request, pk=None):
         try:
-            student = Student.objects.get(pk=pk)
+            student = get_object_or_404(Student.objects.only('id', 'name', 'email', 'date_of_birth'), pk=pk)
         except Student.DoesNotExist as e:
             logger.error(f"Error: {e}")
             return Response(
                 {"success": False, "message": "Student not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        serializer = StudentSerializer(student, data=request.data)
+        serializer = StudentSerializer(student, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             logger.info("Student data updated successfully")
@@ -306,7 +313,7 @@ class StudentView(viewsets.ViewSet):
     )
     def destroy(self, request, pk=None):
         try:
-            student = Student.objects.get(pk=pk)
+            student = get_object_or_404(Student, pk=pk)
             student.delete()
             logger.info("Student data deleted successfully")
             response = {
@@ -462,7 +469,10 @@ class subjectView(viewsets.ViewSet):
     )
     def retrieve(self, request, pk=None):
         try:
-            subject_obj = Subject.objects.get(pk=pk)
+            subject_obj = get_object_or_404(
+                Student.objects.only('id', 'name', 'email', 'date_of_birth'),
+                pk=pk
+            )
             serializer = SubjectSerializer(subject_obj)
             response = {
                 'success': True,
@@ -546,7 +556,10 @@ class subjectView(viewsets.ViewSet):
     )
     def update(self, request, pk=None):
         try:
-            obj = Subject.objects.get(pk=pk)
+            obj = get_object_or_404(
+                Student.objects.only('id', 'name', 'email', 'date_of_birth'),
+                pk=pk
+            )
         except Subject.DoesNotExist as e:
             logger.error(f"Error: {e}")
             return Response(
@@ -612,14 +625,11 @@ class subjectView(viewsets.ViewSet):
     )
     def destroy(self, request, pk=None):
         try:
-            obj = Subject.objects.get(pk=pk)
-            obj.delete()
-            logger.info("Subject data deleted successfully")
-            response = {
-                'sucess':True,
-                'message':" data delete sucessfully"
-            }
-            return Response(response, status=status.HTTP_204_NO_CONTENT)
+            deleted_count, _ = Student.objects.filter(pk=pk).delete()
+            if deleted_count == 0:
+                return Response({'success': False, 'message': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+            logger.info("Student data deleted successfully")
+            return Response({'success': True, 'message': 'Data deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Subject.DoesNotExist as e:
             logger.error(f"Error: {e}")
             return Response(
@@ -693,29 +703,26 @@ class ReportCardView(viewsets.ViewSet):
     )
     def retrieve(self, request, pk=None):
         try:
-            report_card = ReportCard.objects.get(pk=pk)
+            report_card = get_object_or_404(
+                ReportCard.objects
+                    .select_related('student')
+                    .defer('created_date', 'updated_date', 'student__created_date', 'student__updated_date'),
+                pk=pk
+            )
             serializer = ReportCardSerializer(report_card)
-            response = {
+            logger.info(f"ReportCard [{pk}] retrieved successfully")
+            return Response({
                 'success': True,
                 'data': serializer.data,
                 'message': 'ReportCard retrieved successfully',
-            }
-            logger.info("ReportCard retrieved successfully")
-            return Response(response, status=status.HTTP_200_OK)
-        except ReportCard.DoesNotExist:
-            response = {
-                'success': False,
-                'message': f'ReportCard does not exist',
-            }
-            logger.warning(f"ReportCard not found")
-            return Response(response, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
-            response = {
+            logger.exception(f"Unexpected error retrieving ReportCard [{pk}]: {e}")
+            return Response({
                 'success': False,
-                'message': str(e),
-            }
-            logger.error(f"Error retrieving ReportCard: {e}")
-            return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'message': 'An unexpected error occurred',
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @swagger_auto_schema(
@@ -727,11 +734,20 @@ class ReportCardView(viewsets.ViewSet):
     )
     @action(detail=True, methods=['patch'], url_path='update-marks')
     def update_marks(self, request, pk=None):
-        try:
-            report_card = ReportCard.objects.get(pk=pk)
-        except ReportCard.DoesNotExist:
-            return Response({"error": "Report card not found"}, status=status.HTTP_404_NOT_FOUND)
+        report_card = get_object_or_404(
+            ReportCard.objects
+                .prefetch_related('marks')
+                .defer('created_date', 'updated_date', 'marks__created_date', 'marks__updated_date'),
+            pk=pk
+        )
         marks_data = request.data.get('marks', [])
+        if not isinstance(marks_data, list):
+            return Response({"error": "Marks must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+        subject_ids = [m.get('subject') for m in marks_data if 'subject' in m]
+        existing_marks = Mark.objects.filter(report_card=report_card, subject_id__in=subject_ids)
+        existing_lookup = {(m.subject_id): m for m in existing_marks}
+        marks_to_update = []
+        marks_to_create = []
         for mark_data in marks_data:
             subject_id = mark_data.get('subject')
             score = mark_data.get('score')
@@ -740,11 +756,19 @@ class ReportCardView(viewsets.ViewSet):
                     {"error": "Each mark must include subject and score"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            Mark.objects.update_or_create(
-                report_card=report_card,
-                subject_id=subject_id,
-                defaults={'score': score}
-            )
+            if subject_id in existing_lookup:
+                mark = existing_lookup[subject_id]
+                mark.score = score
+                marks_to_update.append(mark)
+            else:
+                marks_to_create.append(
+                    Mark(report_card=report_card, subject_id=subject_id, score=score)
+                )
+        with transaction.atomic():
+            if marks_to_update:
+                Mark.objects.bulk_update(marks_to_update, ['score'])
+            if marks_to_create:
+                Mark.objects.bulk_create(marks_to_create)
         serializer = ReportCardSerializer(report_card)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -758,7 +782,7 @@ class ReportCardView(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path=r'student/(?P<student_id>\d+)/year/(?P<year>\d+)')
     def report_cards_with_summary(self, request, student_id=None, year=None):
         try:
-            report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
+            report_cards = ReportCard.objects.select_related('student').defer('created_date', 'updated_date', 'student__created_date', 'student__updated_date').filter(student_id=student_id, year=year)
             if not report_cards.exists():
                 return Response({
                     "success": False,

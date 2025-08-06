@@ -71,6 +71,10 @@ class ReportCard(models.Model):
         verbose_name_plural = 'Report Cards'
         ordering = ['student', 'year', 'term']
         unique_together = ('student', 'term','year')
+        indexes = [
+            models.Index(fields=['student', 'year']),
+            models.Index(fields=['student', 'term', 'year']),
+        ]
 
 
 class Mark(models.Model):
@@ -96,3 +100,6 @@ class Mark(models.Model):
         verbose_name_plural = 'Marks'
         ordering = ['report_card', 'subject']
         unique_together = ('report_card', 'subject')
+        indexes = [
+            models.Index(fields=['report_card', 'subject']),
+        ]
