@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     'corsheaders',
+    'django_celery_results',
     # Custom apps
     'accounts.apps.AccountsConfig',
     'students.apps.StudentsConfig',
@@ -130,14 +131,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CELERY_BROKER_URL = 'redis://web_redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://web_redis:6379/0'
-CELERY_CACHE_BACKEND = 'redis://web_redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = config('TIME_ZONE', default='UTC')
 CELERY_CREATE_MISSING_QUEUES = False
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'default'
 
 
 LANGUAGE_CODE = 'en-us'
