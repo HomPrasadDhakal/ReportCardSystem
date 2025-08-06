@@ -57,7 +57,7 @@ class ReportCard(models.Model):
         in various subjects.
     """
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='report_cards')
-    term = models.CharField(max_length=2, choices=[('1', 'Term 1'), ('2', 'Term 2'), ('3', 'Term 3')])
+    term = models.CharField(max_length=25, choices=[('Term 1', 'Term 1'), ('Term 2', 'Term 2'), ('Term 3', 'Term 3')])
     year = models.IntegerField(blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)

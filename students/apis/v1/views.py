@@ -730,7 +730,7 @@ class ReportCardView(viewsets.ViewSet):
         tags=["ReportCard Endpoints"],
         security=[{'Bearer': []}]
     )
-    @action(detail=False, methods=['get'], url_path='student/(?P<student_id>\d+)/year/(?P<year>\d+)')
+    @action(detail=False, methods=['get'], url_path=r'student/(?P<student_id>\d+)/year/(?P<year>\d+)')
     def report_cards_by_student_and_year(self, request, student_id=None, year=None):
         report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
         
@@ -746,7 +746,7 @@ class ReportCardView(viewsets.ViewSet):
         tags=["ReportCard Endpoints"],
         security=[{'Bearer': []}]
     )
-    @action(detail=False, methods=['get'], url_path='student/(?P<student_id>[^/.]+)/year/(?P<year>\d+)/summary')
+    @action(detail=False, methods=['get'], url_path=r'student/(?P<student_id>\d+)/year/(?P<year>\d+)')
     def yearly_summary(self, request, student_id, year):
         report_cards = ReportCard.objects.filter(student_id=student_id, year=year)
         marks = report_cards.values('marks__subject').annotate(avg_score=Avg('marks__score'))
