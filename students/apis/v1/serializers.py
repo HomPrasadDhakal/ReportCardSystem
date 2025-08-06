@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from students.models import Student, Subject, ReportCard, Mark
+
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -86,7 +88,19 @@ class ReportCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportCard
         fields = ['id', 'student', 'year', 'term', 'marks']
-
+    
+    # this validation will not raise error becouse the unique_together = ('student', 'term','year') is used into the model if not used the validation will be reflected 
+    def validate(self, attrs):
+        student = attrs.get('student')
+        year = attrs.get('year')
+        term = attrs.get('term')
+        queryset = ReportCard.objects.filter(student=student, year=year, term=term)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise ValidationError("A ReportCard for this student, year, and term already exists.")
+        return attrs
+    
     def create(self, validated_data):
         marks_data = validated_data.pop('marks')
         report_card = ReportCard.objects.create(**validated_data)
