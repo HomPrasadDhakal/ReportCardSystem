@@ -109,7 +109,7 @@ class StudentView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-        operation_summary="Retrieve a Student data",
+        operation_summary="Retrieve a Student data by ID",
         operation_description="retrieves a student by their ID.",
         request_body=None,
         responses={
@@ -180,7 +180,7 @@ class StudentView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-        operation_summary="Update Student data",
+        operation_summary="Update Student data by ID",
         operation_description="update student by their ID.",
         request_body=StudentSerializer,
         responses={
@@ -266,7 +266,7 @@ class StudentView(viewsets.ViewSet):
     
 
     @swagger_auto_schema(
-        operation_summary="Delete Student data",
+        operation_summary="Delete Student data by ID",
         operation_description="Delete student by their ID.",
         request_body=None,
         responses={
@@ -418,7 +418,7 @@ class subjectView(viewsets.ViewSet):
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @swagger_auto_schema(
-        operation_summary="Retrieve a Subject data",
+        operation_summary="Retrieve a Subject data  by ID",
         operation_description="retrieves a Subject by their ID.",
         request_body=None,
         responses={
@@ -488,7 +488,7 @@ class subjectView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-        operation_summary="Update Subject data",
+        operation_summary="Update Subject data by ID",
         operation_description="update Subject by their ID.",
         request_body=SubjectSerializer,
         responses={
@@ -572,7 +572,7 @@ class subjectView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-        operation_summary="Delete subject data",
+        operation_summary="Delete subject data by ID",
         operation_description="Delete subject by their ID.",
         request_body=None,
         responses={
@@ -650,7 +650,7 @@ class ReportCardView(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="Create a New ReportCard",
+        operation_summary="Create a New ReportCard with student and marks",
         operation_description="Creates a new reportcard with the required fields: student term and year.",
         request_body=ReportCardSerializer,
         tags=["ReportCard Endpoints"],
@@ -686,7 +686,7 @@ class ReportCardView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-    operation_summary="Retrieve a ReportCard",
+    operation_summary="Retrieve a ReportCard by ID",
     operation_description="Retrieves a specific report card by ID.",
     tags=["ReportCard Endpoints"],
     security=[{'Bearer': []}]
@@ -719,7 +719,7 @@ class ReportCardView(viewsets.ViewSet):
 
 
     @swagger_auto_schema(
-        operation_summary="Update Marks in report Cards by subject",
+        operation_summary="Update Marks in report Cards",
         operation_description="update marksin in report cards in reportcards by their ID.",
         request_body=ReportCardSerializer,
         tags=["ReportCard Endpoints"],

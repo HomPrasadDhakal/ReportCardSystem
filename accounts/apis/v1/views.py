@@ -11,8 +11,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         - CustomTokenObtainPairView: Provides JWT tokens (access and refresh) upon valid user authentication.
     """
     @swagger_auto_schema(
-        operation_summary="Obtain JWT Token Pair",
-        tags=['Report Card System Authentication'],
+        operation_summary="Featch JWT Token Pair with basic Credential",
+        tags=['Authentication Endpoints'],
         operation_description="Obtain a new pair of access and refresh tokens by providing valid user credentials.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -47,8 +47,8 @@ class CustomTokenRefreshView(TokenRefreshView):
         - CustomTokenRefreshView: Provides a new access token upon receiving a valid refresh token.
     """
     @swagger_auto_schema(
-        operation_summary="Refresh JWT Access Token",
-        tags=['Report Card System Authentication'],
+        operation_summary="Obtain access token via refresh token",
+        tags=['Authentication Endpoints'],
         operation_description="Refresh the JWT access token by providing a valid refresh token.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,

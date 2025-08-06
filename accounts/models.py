@@ -17,7 +17,7 @@ class CustomAccountManager(BaseUserManager):
         Args:
             - email (str)
             - username (str)
-            - password 
+            - password (optional)
         Kwargs:
             - other_fields
         Returns:
@@ -37,13 +37,12 @@ class CustomAccountManager(BaseUserManager):
         Args:
             - email (str)
             - username (str)
-            - password (str) or none
+            - password (optional) 
         Kwargs:
             - other_fields 
         Returns:
             - users instance
         """
-        
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
