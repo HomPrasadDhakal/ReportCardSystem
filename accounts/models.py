@@ -46,7 +46,6 @@ class CustomAccountManager(BaseUserManager):
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
-        other_fields.setdefault('is_supervisor', True)
 
         if other_fields.get('is_staff') is False:
             raise ValueError('Superuser must be assigned is_staff = True')
@@ -75,7 +74,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     username        = models.CharField(verbose_name='Username',max_length=255, unique=True)
     is_active       = models.BooleanField(verbose_name='is active',default=False)
     is_staff        = models.BooleanField(verbose_name='is staff',default=False)
-    is_supervisor   = models.BooleanField(verbose_name='is Supervisor', default=False)
     is_superuser    = models.BooleanField(verbose_name='is superuser',default=False)
     date_joined     = models.DateField(verbose_name='date joined',auto_now_add=True,auto_now=False)
 
