@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
+from students.apis.v1.filters import ReportCardFilter
 from rest_framework.permissions import IsAuthenticated
 from students.apis.v1.pagination import CustomPageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -695,12 +696,19 @@ class ReportCardView(viewsets.ViewSet):
             logger.error(f"Error : {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    filter_params = [
+        openapi.Parameter('year', openapi.IN_QUERY, description="Filter by year", type=openapi.TYPE_INTEGER),
+        openapi.Parameter('term', openapi.IN_QUERY, description="Filter by term", type=openapi.TYPE_STRING),
+        openapi.Parameter('student', openapi.IN_QUERY, description="Filter by student ID", type=openapi.TYPE_INTEGER),
+    ]
 
     @swagger_auto_schema(
         operation_summary="List All the ReportCards",
         operation_description="Returns a paginated list of report cards with related student data.",
         tags=["ReportCard Endpoints"],
-        security=[{'Bearer': []}]
+        security=[{'Bearer': []}],
+        manual_parameters=filter_params,
+        responses={200: ReportCardSerializer(many=True)}
     )
     def list(self, request):
         try:
@@ -708,6 +716,11 @@ class ReportCardView(viewsets.ViewSet):
                 'created_date', 'updated_date', 
                 'student__created_date', 'student__updated_date'
             )
+            filterset = ReportCardFilter(request.GET, queryset=queryset)
+            if filterset.is_valid():
+                queryset = filterset.qs
+            else:
+                return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
             paginator = self.pagination_class()
             paginated_qs = paginator.paginate_queryset(queryset, request)
             serializer = ReportCardSerializer(paginated_qs, many=True)
