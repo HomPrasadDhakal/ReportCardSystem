@@ -85,6 +85,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'students.apis.v1.pagination.CustomPageNumberPagination',
+    'PAGE_SIZE': 10,  
 }
 
 SIMPLE_JWT = {

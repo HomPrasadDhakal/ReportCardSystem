@@ -8,8 +8,8 @@ from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from students.apis.v1.pagination import CustomPageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
 
 from students.models import (
     Student,
@@ -658,6 +658,7 @@ class ReportCardView(viewsets.ViewSet):
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPageNumberPagination
 
     @swagger_auto_schema(
         operation_summary="Create a New ReportCard with student and marks",
@@ -693,6 +694,35 @@ class ReportCardView(viewsets.ViewSet):
             }
             logger.error(f"Error : {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @swagger_auto_schema(
+        operation_summary="List All the ReportCards",
+        operation_description="Returns a paginated list of report cards with related student data.",
+        tags=["ReportCard Endpoints"],
+        security=[{'Bearer': []}]
+    )
+    def list(self, request):
+        try:
+            queryset = ReportCard.objects.select_related('student').defer(
+                'created_date', 'updated_date', 
+                'student__created_date', 'student__updated_date'
+            )
+            paginator = self.pagination_class()
+            paginated_qs = paginator.paginate_queryset(queryset, request)
+            serializer = ReportCardSerializer(paginated_qs, many=True)
+            logger.info("ReportCard list retrieved successfully")
+            return paginator.get_paginated_response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'ReportCards retrieved successfully',
+            })
+        except Exception as e:
+            logger.exception(f"Unexpected error retrieving ReportCard list: {e}")
+            return Response({
+                'success': False,
+                'message': 'An unexpected error occurred',
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @swagger_auto_schema(

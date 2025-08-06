@@ -99,12 +99,10 @@ class ReportCardSerializer(serializers.ModelSerializer):
         instance.term = validated_data.get('term', instance.term)
         instance.year = validated_data.get('year', instance.year)
         instance.save()
-
         for mark_data in marks_data:
             Mark.objects.update_or_create(
                 report_card=instance,
                 subject=mark_data['subject'],
                 defaults={'score': mark_data['score']}
             )
-
         return instance
