@@ -1,5 +1,5 @@
 from drf_yasg import openapi
-from django.db.models import Avg
+from django.db.models import Avg, F
 from django.db import transaction
 from core.logs.logger import logger
 from rest_framework import viewsets, status
@@ -11,6 +11,7 @@ from students.apis.v1.filters import ReportCardFilter
 from rest_framework.permissions import IsAuthenticated
 from students.apis.v1.pagination import CustomPageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 from students.models import (
     Student,
