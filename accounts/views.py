@@ -3,4 +3,4 @@ from core.logs.logger import logger
 
 def user_login(request):
     context = {}
-    return render(request, 'accounts/login.html', context)
+    return render(request, 'accounts/landing.html', context)
