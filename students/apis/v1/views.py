@@ -11,6 +11,7 @@ from students.apis.v1.filters import ReportCardFilter
 from rest_framework.permissions import IsAuthenticated
 from students.apis.v1.pagination import CustomPageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from students.tasks import avg_calculation_of_reportcard_by_student_by_year
 
 
 from students.models import (
@@ -696,7 +697,6 @@ class ReportCardView(viewsets.ViewSet):
             }
             logger.error(f"Error : {e}")
             return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     filter_params = [
         openapi.Parameter('year', openapi.IN_QUERY, description="Filter by year", type=openapi.TYPE_INTEGER),
         openapi.Parameter('term', openapi.IN_QUERY, description="Filter by term", type=openapi.TYPE_STRING),
@@ -760,7 +760,6 @@ class ReportCardView(viewsets.ViewSet):
                 'data': serializer.data,
                 'message': 'ReportCard retrieved successfully',
             }, status=status.HTTP_200_OK)
-
         except Exception as e:
             logger.exception(f"Unexpected error retrieving ReportCard [{pk}]: {e}")
             return Response({
@@ -827,6 +826,9 @@ class ReportCardView(viewsets.ViewSet):
     def report_cards_with_summary(self, request, student_id=None, year=None):
         try:
             report_cards = ReportCard.objects.select_related('student').defer('created_date', 'updated_date', 'student__created_date', 'student__updated_date').filter(student_id=student_id, year=year)
+            # calculate the avg report directly if there is large number of data then we can use celery which sample is show below
+            # we can check the result from the result id given below
+            result_id = avg_calculation_of_reportcard_by_student_by_year.delay(student_id, year)
             if not report_cards.exists():
                 return Response({
                     "success": False,
