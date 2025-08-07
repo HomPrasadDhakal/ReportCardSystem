@@ -1,24 +1,56 @@
 from celery import shared_task
-from django.db.models import Avg
+from core.logs.logger import logger
+from django.db.models import Sum, Avg
 from students.models import ReportCard
-from django.core.serializers.json import DjangoJSONEncoder
-import json
+from students.models import StudentTermSummary, Mark
+
+def calculate_grade(score):
+    """
+    calculate the grade of student according to the score
+    Args:
+        - score (student marks)
+    Returns:
+        garde of student
+    """
+    if score >= 90:
+        return 'A+'
+    elif score >= 80:
+        return 'A'
+    elif score >= 70:
+        return 'B'
+    elif score >= 60:
+        return 'C'
+    elif score >= 50:
+        return 'D'
+    else:
+        return 'F'
+
 
 @shared_task
-def avg_calculation_of_reportcard_by_student_by_year(student_id, year):
-    print("start celery task....")
-    report_cards = ReportCard.objects.select_related('student').defer(
-        'created_date', 'updated_date',
-        'student__created_date', 'student__updated_date'
-    ).filter(student_id=student_id, year=year)
-    subject_averages_qs = report_cards.values('marks__subject').annotate(avg_score=Avg('marks__score'))
-    subject_averages = list(subject_averages_qs)
-    overall_avg = report_cards.aggregate(overall_avg=Avg('marks__score'))['overall_avg']
-    report_card_data = list(report_cards.values('id', 'student_id', 'year'))
-    result = {
-        "subject_averages": list(subject_averages),
-        "overall_avg": str(overall_avg) if overall_avg is not None else None,
-        "report_cards": list(report_cards.values('id', 'student_id', 'year')),
-    }
-    # return response
-    return json.loads(json.dumps(result, cls=DjangoJSONEncoder))
+def calculate_student_term_summaries():
+    """
+    calculate the student terms summaries
+    Args:
+        -
+    Return: create calculated data into StudentTermSummary models
+    """
+    report_cards = ReportCard.objects.all().select_related('student')
+    for rc in report_cards:
+        marks = Mark.objects.filter(report_card=rc)
+        total = marks.aggregate(total=Sum('score'))['total'] or 0
+        average = marks.aggregate(avg=Avg('score'))['avg'] or 0
+        grade = calculate_grade(average)
+        obj, created = StudentTermSummary.objects.update_or_create(
+            student=rc.student,
+            term=rc.term,
+            year=rc.year,
+            defaults={
+                'total_score': total,
+                'average_score': average,
+                'grade': grade,
+            }
+        )
+        if created:
+            logger.info(f"Created StudentTermSummary for {rc.student.name}, {rc.term} {rc.year}")
+        else:
+            logger.info(f"Updated StudentTermSummary for {rc.student.name}, {rc.term} {rc.year}")

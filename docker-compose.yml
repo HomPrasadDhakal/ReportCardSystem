@@ -13,6 +13,7 @@ services:
     build: .
     volumes:
       - .:/code
+      - db_data:/code/dbdata
     ports:
       - "8000:8000"
     environment:
@@ -35,6 +36,9 @@ services:
       - CELERY_BROKER_URL=redis://web_redis:6379/0
       - CELERY_RESULT_BACKEND=django-db
     command: celery -A reportcardsystem.celery worker --loglevel=info
+    volumes:
+      - .:/code
+      - db_data:/code/dbdata
     networks:
       - web
   web_celery_beat:
@@ -48,6 +52,9 @@ services:
       - CELERY_BROKER_URL=redis://web_redis:6379/0
       - CELERY_RESULT_BACKEND=django-db
     command: celery -A reportcardsystem.celery beat --loglevel=info
+    volumes:
+      - .:/code
+      - db_data:/code/dbdata
     networks:
       - web
 
@@ -56,3 +63,5 @@ networks:
   web:
     driver: bridge
 
+volumes:
+  db_data:

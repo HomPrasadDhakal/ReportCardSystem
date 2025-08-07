@@ -103,3 +103,26 @@ class Mark(models.Model):
         indexes = [
             models.Index(fields=['report_card', 'subject']),
         ]
+
+
+class StudentTermSummary(models.Model):
+    """
+    Model representing student term summary.
+    Base classes:
+        - models.Model
+    Returns:
+        - StudentTermSummary: A StudentTermSummary instance.
+    """
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    term = models.CharField(max_length=25)
+    year = models.IntegerField()
+    total_score = models.DecimalField(max_digits=6, decimal_places=2)
+    average_score = models.DecimalField(max_digits=5, decimal_places=2)
+    grade = models.CharField(max_length=2)
+    calculated_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'student_term_summaries'
+        verbose_name = 'StudentTermSummary'
+        verbose_name_plural = 'StudentTermSummary'
+        unique_together = ('student', 'term', 'year')
