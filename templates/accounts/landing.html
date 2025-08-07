@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% endblock title %}
+
+{% block css %}
+<style>
+.mainbox{
+    background-color: #43766C;
+    border-radius: 3vh;
+    margin-top: 4.5%;
+    padding-top: 5%;
+    padding-bottom: 5%;
+}
+.title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #bdd2cb;
+    text-align: center;
+    width: 60%;
+    margin-left: 20%;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+
+}
+.image {
+    width: 30%;
+    height: 30%;
+    margin-left: 38%;
+    margin-top: 8%;
+    background-color: #43766C;
+}
+.links {
+    color: white;
+    display: flex;
+    gap: 35px;
+}
+.links a {
+    color: #bdd2cb;
+    font: 30px;
+    padding: 15px;
+    border: 2px solid #81a096;
+    border-radius: 3vh;
+    background: linear-gradient(to left, #43766C, #81a096, #43766C);
+    text-decoration: none;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+
+}
+.links a:hover{
+    background: linear-gradient(to left, #81a096, #43766C, #81a096);
+}
+.desc {
+    text-align: center;
+    padding: 5% 5% 0% 5%;
+    color: #bdd2cb;
+    font-size: 18px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+
+}
+body {
+    background: #bdd2cb;
+}
+</style>
+{% endblock css %}
+
+{% block body %}
+<section>
+    <div class="container">
+        <div class="mainbox">
+            <h5 class="title">Welcome To Report Card System</h5>
+            <div class="image">
+                <img src="https://ing.com.np/images/ing-tech-logo.svg" alt="" srcset="">
+            </div>
+            <p class="desc">
+                The links below will redirect you to the API documentation resources. The first link will redirect you to the Swagger UI, where you can explore and interact with the APIs in a live environment. It allows you to test endpoints, view request/response formats, and understand how the APIs behave in real time. The second link will redirect you to ReDoc, which provides static, detailed documentation of all available endpoints, parameters, response structures, and usage guidelines. The third link will redirect you to the Admin Panel, where administrative settings can be managed and backend operations performed. also postman collection is in codebase</p>
+            <div class="row justify-content-center mt-5 pt-5">
+                <div class="links">
+                    <a href="swagger" >Swagger Documentation</a> 
+                    <a href="documentation">ReDoc Documentation</a>
+                    <a href="admin">Django Admin Pannel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock body %}
+
+{% block script %}
+{% endblock script %}

@@ -4,15 +4,11 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 
-
-
-
-
 @admin.register(User)
 class UserADmin(UserAdmin):
-    list_display=['id','email','username','is_supervisor','is_staff','is_active','date_joined']
+    list_display=['id','email','username','is_staff','is_active','date_joined']
     list_display_links=['id','email',]
-    list_filter = ['is_active','is_staff','is_superuser','date_joined','is_supervisor']
+    list_filter = ['is_active','is_staff','is_superuser','date_joined']
     readonly_fields = ('date_joined','last_login')
     search_fields = ['email','username']
     filter_horizontal = ('groups', 'user_permissions')
@@ -21,7 +17,7 @@ class UserADmin(UserAdmin):
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ( 'email',)}),
         (_('Permissions'), {
-            'fields': ('is_active', 'is_staff', 'is_supervisor','is_superuser','groups', 'user_permissions'),
+            'fields': ('is_active', 'is_staff','is_superuser','groups', 'user_permissions'),
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )

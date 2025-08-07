@@ -39,7 +39,7 @@ class Subject(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.name + " - " + self.code
 
     class Meta:
         db_table = 'subjects'
@@ -57,7 +57,7 @@ class ReportCard(models.Model):
         in various subjects.
     """
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='report_cards')
-    term = models.CharField(max_length=2, choices=[('1', 'Term 1'), ('2', 'Term 2'), ('3', 'Term 3')])
+    term = models.CharField(max_length=25, choices=[('Term 1', 'Term 1'), ('Term 2', 'Term 2'), ('Term 3', 'Term 3')])
     year = models.IntegerField(blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -69,7 +69,12 @@ class ReportCard(models.Model):
         db_table = 'report_cards'
         verbose_name = 'Report Card'
         verbose_name_plural = 'Report Cards'
-        ordering = ['student', 'year']
+        ordering = ['student', 'year', 'term']
+        unique_together = ('student', 'term','year')
+        indexes = [
+            models.Index(fields=['student', 'year']),
+            models.Index(fields=['student', 'term', 'year']),
+        ]
 
 
 class Mark(models.Model):
@@ -94,3 +99,30 @@ class Mark(models.Model):
         verbose_name = 'Mark'
         verbose_name_plural = 'Marks'
         ordering = ['report_card', 'subject']
+        unique_together = ('report_card', 'subject')
+        indexes = [
+            models.Index(fields=['report_card', 'subject']),
+        ]
+
+
+class StudentTermSummary(models.Model):
+    """
+    Model representing student term summary.
+    Base classes:
+        - models.Model
+    Returns:
+        - StudentTermSummary: A StudentTermSummary instance.
+    """
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    term = models.CharField(max_length=25)
+    year = models.IntegerField()
+    total_score = models.DecimalField(max_digits=6, decimal_places=2)
+    average_score = models.DecimalField(max_digits=5, decimal_places=2)
+    grade = models.CharField(max_length=2)
+    calculated_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'student_term_summaries'
+        verbose_name = 'StudentTermSummary'
+        verbose_name_plural = 'StudentTermSummary'
+        unique_together = ('student', 'term', 'year')

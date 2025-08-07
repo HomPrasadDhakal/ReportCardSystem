@@ -1,10 +1,12 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from students.models import Student, Subject, ReportCard, Mark
+
 
 
 class StudentSerializer(serializers.ModelSerializer):
     """
-    Serializer representing a student in the academic system with validation.
+    Serializer representing a student model with validation.
     Base classes:
         - serializers.ModelSerializer
     Returns:
@@ -12,7 +14,7 @@ class StudentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Student
-        fields = ['name', 'email', 'date_of_birth']
+        fields = ['id','name', 'email', 'date_of_birth']
 
     def validate_name(self, value):
         if not value:
@@ -36,3 +38,85 @@ class StudentSerializer(serializers.ModelSerializer):
         if value.year > 2025:
             raise serializers.ValidationError("Date of birth year cannot be in the future.")
         return value
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    """
+        Serializer representing a subject model with validation.
+        Base classes:
+            - serializers.ModelSerializer
+        Returns:
+            - SubjectSerializer: A serializer instance for Subject fields.
+    """
+    class Meta:
+        model = Subject
+        fields = ['id','name', 'code']
+
+    def validate_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Name is required.")
+        return value
+    
+    def validate_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Code is requried.")
+        return value
+
+class MarkSerializer(serializers.ModelSerializer):
+    """
+        Serializer representing a report model with validation.
+        Base classes:
+            - serializers.ModelSerializer
+        Returns:
+            - ReportSerializer: A serializer instance for report fields.
+    """
+
+    class Meta:
+        model = Mark
+        fields = ['id', 'subject', 'score']
+
+class ReportCardSerializer(serializers.ModelSerializer):
+    """
+        Serializer representing a report model with validation.
+        Base classes:
+            - serializers.ModelSerializer
+        Returns:
+            - ReportSerializer: A serializer instance for report fields.
+    """
+    marks = MarkSerializer(many=True)
+
+    class Meta:
+        model = ReportCard
+        fields = ['id', 'student', 'year', 'term', 'marks']
+    
+    # this validation will not raise error becouse the unique_together = ('student', 'term','year') is used into the model if not used the validation will be reflected 
+    def validate(self, attrs):
+        student = attrs.get('student')
+        year = attrs.get('year')
+        term = attrs.get('term')
+        queryset = ReportCard.objects.filter(student=student, year=year, term=term)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise ValidationError("A ReportCard for this student, year, and term already exists.")
+        return attrs
+    
+    def create(self, validated_data):
+        marks_data = validated_data.pop('marks')
+        report_card = ReportCard.objects.create(**validated_data)
+        for mark in marks_data:
+            Mark.objects.create(report_card=report_card, **mark)
+        return report_card
+
+    def update(self, instance, validated_data):
+        marks_data = validated_data.pop('marks')
+        instance.term = validated_data.get('term', instance.term)
+        instance.year = validated_data.get('year', instance.year)
+        instance.save()
+        for mark_data in marks_data:
+            Mark.objects.update_or_create(
+                report_card=instance,
+                subject=mark_data['subject'],
+                defaults={'score': mark_data['score']}
+            )
+        return instance

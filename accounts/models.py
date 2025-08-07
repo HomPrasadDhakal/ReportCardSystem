@@ -12,6 +12,17 @@ class CustomAccountManager(BaseUserManager):
         - create user and superuser instances.
     """
     def create_user(self, email, username, password=None, **other_fields):
+        """
+        This function will create user
+        Args:
+            - email (str)
+            - username (str)
+            - password (optional)
+        Kwargs:
+            - other_fields
+        Returns:
+            - user instance
+        """
         email = self.normalize_email(email)
         user  = self.model(email=email, username=username, **other_fields)
         if password is None:
@@ -21,10 +32,20 @@ class CustomAccountManager(BaseUserManager):
         return user
     
     def create_superuser(self, email, username, password=None, **other_fields):
+        """
+        This func will create the super user
+        Args:
+            - email (str)
+            - username (str)
+            - password (optional) 
+        Kwargs:
+            - other_fields 
+        Returns:
+            - users instance
+        """
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
-        other_fields.setdefault('is_supervisor', True)
 
         if other_fields.get('is_staff') is False:
             raise ValueError('Superuser must be assigned is_staff = True')
@@ -53,7 +74,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     username        = models.CharField(verbose_name='Username',max_length=255, unique=True)
     is_active       = models.BooleanField(verbose_name='is active',default=False)
     is_staff        = models.BooleanField(verbose_name='is staff',default=False)
-    is_supervisor   = models.BooleanField(verbose_name='is Supervisor', default=False)
     is_superuser    = models.BooleanField(verbose_name='is superuser',default=False)
     date_joined     = models.DateField(verbose_name='date joined',auto_now_add=True,auto_now=False)
 

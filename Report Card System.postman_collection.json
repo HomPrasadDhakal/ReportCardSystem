@@ -1,0 +1,577 @@
+{
+	"info": {
+		"_postman_id": "377f2f32-acce-441f-b41f-253577e36e24",
+		"name": "Report Card System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32702939",
+		"_collection_link": "https://speeding-comet-460321.postman.co/workspace/Ekghanti-EBX~ad7d1f41-94ee-4653-863b-8d3993f34f85/collection/32702939-377f2f32-acce-441f-b41f-253577e36e24?action=share&source=collection_link&creator=32702939"
+	},
+	"item": [
+		{
+			"name": "Authentication Endpoints",
+			"item": [
+				{
+					"name": "create token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"admin@email.com\",\r\n  \"password\": \"adM!N@8848\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/api/v1/token/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create access token from refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refresh\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1NzE1MDI0NCwiaWF0IjoxNzU0NTU4MjQ0LCJqdGkiOiI5NWI2NDA1YjRiOTE0ZWY1YWY2OWQ3MTgwOTc1OTQ1ZCIsInVzZXJfaWQiOiIxIn0.dCTGubLb3USKrR0XXED2ASijsoi6lOLA7kA7atAWziw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/api/v1/token/refresh/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"token",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subject Endpoints",
+			"item": [
+				{
+					"name": "Create New Subject",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"COMPUTER\",\r\n    \"code\":\"CsMaP321\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/subject/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"subject",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get single subject by its ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/subject/1/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"subject",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Subject by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"CCCMPUTTEERR\",\r\n    \"code\":\"GFTG321\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/apis/v1/subject/1/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"apis",
+								"v1",
+								"subject",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Subject by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/subject/1/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"subject",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student Endpoints",
+			"item": [
+				{
+					"name": "Create New Student",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"RAM DHAKAL\",\r\n    \"email\":\"EMAL@asa.com\",\r\n    \"date_of_birth\": \"2025-02-03\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/student/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"student",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get student details by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/student/4/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"student",
+								"4",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Student By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/student/5/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"student",
+								"5",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update student by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"name\": \"RAJU DHAKAL\",\r\n    \"email\": \"EMAL@sa.com\",\r\n    \"date_of_birth\": \"2025-02-03\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/student/4/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"student",
+								"4",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ReportCard Endpoints",
+			"item": [
+				{
+					"name": "List of ReportCard  with filter and pagination",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/reportcard/?year=2025&term=Term%201&student=6",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"reportcard",
+								""
+							],
+							"query": [
+								{
+									"key": "year",
+									"value": "2025"
+								},
+								{
+									"key": "term",
+									"value": "Term%201"
+								},
+								{
+									"key": "student",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Report cards",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"student\": 6,\r\n  \"year\":2025,\r\n  \"term\": \"Term 1\",\r\n  \"marks\": [\r\n    {\r\n      \"subject\": 4,\r\n      \"score\": 22.22\r\n    },\r\n    {\r\n        \"subject\":5,\r\n        \"score\": 3.33\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/reportcard/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"reportcard",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Report Cards and avg score of year",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/apis/v1/reportcard/student/6/year/2025/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"apis",
+								"v1",
+								"reportcard",
+								"student",
+								"6",
+								"year",
+								"2025",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get report Card by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTg4ODQ2LCJpYXQiOjE3NTQ1ODUyNDYsImp0aSI6IjNlMjYzODFiZDMxYjQ1ZTJiNjkwY2M4NDYxY2Y4NjU2IiwidXNlcl9pZCI6IjEifQ.5O6on_YqOVpGnCtq4xqNDuSscwEW9ia789UyxgJeAKI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/reportcard/6/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"reportcard",
+								"6",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update Marks in report Card",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0NTkzMDQwLCJpYXQiOjE3NTQ1ODk0NDAsImp0aSI6IjY1MjE3NzhhZDBhMjQ4YjNhNjljODk2MWNlZmRlMjY0IiwidXNlcl9pZCI6IjEifQ.1j7pzSl0qa993BqPAFa5bdsfcdNXOFeIL8jeHSHA_sA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"student\": 7,\r\n  \"year\": 2025,\r\n  \"term\": \"Term 1\",\r\n  \"marks\": [\r\n    {\r\n      \"subject\": 6,\r\n      \"score\": \"22.54\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{LOCAL_BASE_URL}}/apis/v1/reportcard/6/update-marks/",
+							"host": [
+								"{{LOCAL_BASE_URL}}"
+							],
+							"path": [
+								"apis",
+								"v1",
+								"reportcard",
+								"6",
+								"update-marks",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -20,6 +20,8 @@ Returns:
 app_name = 'students_apis_v1'
 
 router = DefaultRouter()
-router.register('apis/v1/students', student_views.StudentView, basename='student')
+router.register('apis/v1/student', student_views.StudentView, basename='student')
+router.register('apis/v1/subject', student_views.subjectView, basename='subject')
+router.register('apis/v1/reportcard', student_views.ReportCardView, basename='reportcard')
 
 urlpatterns = router.urls

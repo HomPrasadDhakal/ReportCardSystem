@@ -5,8 +5,10 @@ from students.models import (
     Subject,
     ReportCard,
     Mark,
+    StudentTermSummary,
 )
 from django.contrib.admin.widgets import AdminDateWidget
+from students.tasks import calculate_student_term_summaries
 
 
 @admin.register(Student)
@@ -74,6 +76,23 @@ class SubjectAdmin(admin.ModelAdmin):
     }
 
 
+@admin.action(description="Recalculate all student term summaries")
+def recalculate_term_summaries(modeladmin, request, queryset):
+    """
+    Admin action to trigger a Celery task that recalculates term summaries
+    for all report cards.
+
+    Args:
+        modeladmin (ModelAdmin): The current admin instance.
+        request (HttpRequest): The current request object.
+        queryset (QuerySet): The queryset of selected ReportCard objects.
+
+    Returns:
+        None
+    """
+    calculate_student_term_summaries.delay()
+
+
 @admin.register(ReportCard)
 class ReportCardAdmin(admin.ModelAdmin):
     """
@@ -104,6 +123,7 @@ class ReportCardAdmin(admin.ModelAdmin):
         models.CharField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'style': 'width: 100%;'})},
         models.IntegerField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'style': 'width: 100%;'})},
     }
+    actions = [recalculate_term_summaries]
 
 
 @admin.register(Mark)
@@ -135,3 +155,30 @@ class MarkAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.DecimalField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'style': 'width: 100%;'})},
     }
+
+
+@admin.register(StudentTermSummary)
+class StudentTermSummaryAdmin(admin.ModelAdmin):
+    """
+        Admin interface for managing student term summaries in the academic system.
+        Base classes:
+            - admin.ModelAdmin
+        Returns:
+            - StudentTermSummaryAdmin: Provides display, search, filtering, and editing capabilities
+            for StudentTermSummary instances including student, term, year, average score, and timestamps.
+    """
+    list_display = ['student', 'term', 'year', 'average_score','total_score','grade']
+    search_fields = ['student__name', 'term', 'year']
+    list_filter = ['term', 'year']
+
+    fieldsets = (
+        ('Student Information', {
+            'fields': ('student',)
+        }),
+        ('Term Details', {
+            'fields': ('term', 'year')
+        }),
+        ('Summary Data', {
+            'fields': ('average_score','total_score','grade')
+        })
+    )
