@@ -17,7 +17,7 @@ services:
       - "8000:8000"
     environment:
       - CELERY_BROKER_URL=redis://web_redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://web_redis:6379/0
+      - CELERY_RESULT_BACKEND=django-db
     depends_on:
       - web_redis
     entrypoint: ["/code/entrypoint.sh"]
@@ -33,7 +33,7 @@ services:
       - web_redis
     environment:
       - CELERY_BROKER_URL=redis://web_redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://web_redis:6379/0
+      - CELERY_RESULT_BACKEND=django-db
     command: celery -A reportcardsystem.celery worker --loglevel=info
     networks:
       - web
@@ -46,7 +46,7 @@ services:
       - web_redis
     environment:
       - CELERY_BROKER_URL=redis://web_redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://web_redis:6379/0
+      - CELERY_RESULT_BACKEND=django-db
     command: celery -A reportcardsystem.celery beat --loglevel=info
     networks:
       - web

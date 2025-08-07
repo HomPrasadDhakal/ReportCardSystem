@@ -1,6 +1,8 @@
 from celery import shared_task
 from django.db.models import Avg
 from students.models import ReportCard
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 @shared_task
 def avg_calculation_of_reportcard_by_student_by_year(student_id, year):
@@ -13,9 +15,10 @@ def avg_calculation_of_reportcard_by_student_by_year(student_id, year):
     subject_averages = list(subject_averages_qs)
     overall_avg = report_cards.aggregate(overall_avg=Avg('marks__score'))['overall_avg']
     report_card_data = list(report_cards.values('id', 'student_id', 'year'))
-    response = {
-        'subject_averages': subject_averages,
-        'overall_avg': overall_avg,
-        'report_cards': report_card_data,
+    result = {
+        "subject_averages": list(subject_averages),
+        "overall_avg": str(overall_avg) if overall_avg is not None else None,
+        "report_cards": list(report_cards.values('id', 'student_id', 'year')),
     }
-    return response
+    # return response
+    return json.loads(json.dumps(result, cls=DjangoJSONEncoder))
