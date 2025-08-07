@@ -314,16 +314,16 @@ class StudentView(viewsets.ViewSet):
     )
     def destroy(self, request, pk=None):
         try:
-            student = get_object_or_404(Student, pk=pk)
+            student = Student.objects.get(id=pk)
             student.delete()
             logger.info("Student data deleted successfully")
             response = {
                 'sucess':True,
-                'message':" data delete sucessfully"
+                'message':"Data deleted successfully"
             }
             return Response(response, status=status.HTTP_204_NO_CONTENT)
-        except Student.DoesNotExist as e:
-            logger.error(f"Error: {e}")
+        except Student.DoesNotExist:
+            logger.error(f"Error Student dosen't exist")
             return Response(
                 {
                     "success": False,
@@ -468,10 +468,10 @@ class subjectView(viewsets.ViewSet):
         tags=["Subject Endpoints"],
         security=[{'Bearer': []}]
     )
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk):
         try:
             subject_obj = get_object_or_404(
-                Student.objects.only('id', 'name', 'email', 'date_of_birth'),
+                Subject.objects.only('id', 'name', 'code'),
                 pk=pk
             )
             serializer = SubjectSerializer(subject_obj)
@@ -558,7 +558,7 @@ class subjectView(viewsets.ViewSet):
     def update(self, request, pk=None):
         try:
             obj = get_object_or_404(
-                Student.objects.only('id', 'name', 'email', 'date_of_birth'),
+                Subject.objects.only('id', 'name', 'code'),
                 pk=pk
             )
         except Subject.DoesNotExist as e:
@@ -745,12 +745,10 @@ class ReportCardView(viewsets.ViewSet):
     )
     def retrieve(self, request, pk=None):
         try:
-            report_card = get_object_or_404(
-                ReportCard.objects
-                    .select_related('student')
-                    .defer('created_date', 'updated_date', 'student__created_date', 'student__updated_date'),
-                pk=pk
-            )
+            report_card = ReportCard.objects \
+            .select_related('student') \
+            .defer('created_date', 'updated_date', 'student__created_date', 'student__updated_date') \
+            .get(pk=pk)
             serializer = ReportCardSerializer(report_card)
             logger.info(f"ReportCard [{pk}] retrieved successfully")
             return Response({
@@ -758,8 +756,14 @@ class ReportCardView(viewsets.ViewSet):
                 'data': serializer.data,
                 'message': 'ReportCard retrieved successfully',
             }, status=status.HTTP_200_OK)
+        except ReportCard.DoesNotExist:
+            logger.error("ReportCard Dosent Exist")
+            return Response({
+                'success': False,
+                'message': 'ReportCard Dosent Exist',
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
-            logger.exception(f"Unexpected error retrieving ReportCard [{pk}]: {e}")
+            logger.error(f"Unexpected error retrieving ReportCard [{pk}]: {e}")
             return Response({
                 'success': False,
                 'message': 'An unexpected error occurred',
@@ -775,43 +779,62 @@ class ReportCardView(viewsets.ViewSet):
     )
     @action(detail=True, methods=['patch'], url_path='update-marks')
     def update_marks(self, request, pk=None):
-        report_card = get_object_or_404(
-            ReportCard.objects
-                .prefetch_related('marks')
-                .defer('created_date', 'updated_date', 'marks__created_date', 'marks__updated_date'),
-            pk=pk
-        )
+        try:
+            report_card = ReportCard.objects \
+                .prefetch_related('marks') \
+                .defer(
+                    'created_date', 'updated_date',
+                    'marks__created_date', 'marks__updated_date'
+                ).get(pk=pk)
+        except ReportCard.DoesNotExist:
+            return Response({
+                "success": False,
+                "message": "Report card not found."
+            }, status=status.HTTP_404_NOT_FOUND)
         marks_data = request.data.get('marks', [])
         if not isinstance(marks_data, list):
-            return Response({"error": "Marks must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "success": False,
+                "message": "Marks must be provided as a list."
+            }, status=status.HTTP_400_BAD_REQUEST)
         subject_ids = [m.get('subject') for m in marks_data if 'subject' in m]
         existing_marks = Mark.objects.filter(report_card=report_card, subject_id__in=subject_ids)
-        existing_lookup = {(m.subject_id): m for m in existing_marks}
+        existing_lookup = {m.subject_id: m for m in existing_marks}
         marks_to_update = []
         marks_to_create = []
-        for mark_data in marks_data:
-            subject_id = mark_data.get('subject')
-            score = mark_data.get('score')
-            if subject_id is None or score is None:
-                return Response(
-                    {"error": "Each mark must include subject and score"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            if subject_id in existing_lookup:
-                mark = existing_lookup[subject_id]
-                mark.score = score
-                marks_to_update.append(mark)
-            else:
-                marks_to_create.append(
-                    Mark(report_card=report_card, subject_id=subject_id, score=score)
-                )
-        with transaction.atomic():
-            if marks_to_update:
-                Mark.objects.bulk_update(marks_to_update, ['score'])
-            if marks_to_create:
-                Mark.objects.bulk_create(marks_to_create)
+        try:
+            for mark_data in marks_data:
+                subject_id = mark_data.get('subject')
+                score = mark_data.get('score')
+                if subject_id is None or score is None:
+                    return Response({
+                        "success": False,
+                        "message": "Each mark must include both 'subject' and 'score'."
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                if subject_id in existing_lookup:
+                    mark = existing_lookup[subject_id]
+                    mark.score = score
+                    marks_to_update.append(mark)
+                else:
+                    marks_to_create.append(
+                        Mark(report_card=report_card, subject_id=subject_id, score=score)
+                    )
+            with transaction.atomic():
+                if marks_to_update:
+                    Mark.objects.bulk_update(marks_to_update, ['score'])
+                if marks_to_create:
+                    Mark.objects.bulk_create(marks_to_create)
+        except Exception as e:
+            return Response({
+                "success": False,
+                "message": f"An unexpected error occurred: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer = ReportCardSerializer(report_card)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({
+            "success": True,
+            "message": "Marks updated successfully.",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
     @swagger_auto_schema(

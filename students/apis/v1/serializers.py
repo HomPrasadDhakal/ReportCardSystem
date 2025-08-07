@@ -14,7 +14,7 @@ class StudentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Student
-        fields = ['name', 'email', 'date_of_birth']
+        fields = ['id','name', 'email', 'date_of_birth']
 
     def validate_name(self, value):
         if not value:
@@ -50,7 +50,7 @@ class SubjectSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Subject
-        fields = ['name', 'code']
+        fields = ['id','name', 'code']
 
     def validate_name(self, value):
         if not value:
